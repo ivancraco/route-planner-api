@@ -1,0 +1,22 @@
+# Environment
+.env
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kotlin/Java
+out/
+*.hprof
+*.stacktrace

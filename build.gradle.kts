@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.koin.loggerSlf4j)
     implementation(libs.logback.classic)
     implementation("com.microsoft.sqlserver:mssql-jdbc:13.2.1.jre11")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
