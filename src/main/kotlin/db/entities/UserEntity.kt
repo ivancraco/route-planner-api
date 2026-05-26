@@ -1,5 +1,6 @@
 package com.routeplanner.api.db.entities
 
+import com.routeplanner.api.db.tables.SupervisorTable
 import com.routeplanner.api.db.tables.UserTable
 import com.routeplanner.api.domain.model.User
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
@@ -11,7 +12,8 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     var username by UserTable.username
     var fullName by UserTable.fullName
     var password by UserTable.password
-    var isActive by UserTable.isActive
+    val supervisor by SupervisorEntity referrersOn SupervisorTable.id
+    val isSupervisor get() = !supervisor.empty()
 
     fun toUser() = User(
         id = id.value,

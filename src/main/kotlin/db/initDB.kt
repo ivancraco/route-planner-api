@@ -1,11 +1,10 @@
 package com.routeplanner.api.db
 
 import io.github.cdimascio.dotenv.dotenv
-import io.ktor.server.application.Application
 import org.jetbrains.exposed.v1.jdbc.Database
 
 
-fun Application.initDB() {
+fun initDB() {
     val dotenv = dotenv()
 
     val dbUrl =

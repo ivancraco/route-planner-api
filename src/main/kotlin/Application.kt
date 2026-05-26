@@ -5,6 +5,7 @@ import com.routeplanner.api.config.configureSecurity
 import com.routeplanner.api.db.initDB
 import com.routeplanner.api.di.configureKoin
 import com.routeplanner.api.domain.service.UserService
+import com.routeplanner.api.route.userRoutes
 import io.ktor.server.application.Application
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -22,6 +23,7 @@ fun Application.module() {
 
     val userService = get<UserService>()
     configureSecurity(userService)
+    userRoutes(userService)
 
     routing {
         get("/") {

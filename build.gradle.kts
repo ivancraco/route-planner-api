@@ -35,6 +35,7 @@ dependencies {
     implementation(libs.koin.ktor)
     implementation(libs.koin.loggerSlf4j)
     implementation(libs.logback.classic)
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0")
     implementation("com.microsoft.sqlserver:mssql-jdbc:13.2.1.jre11")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 

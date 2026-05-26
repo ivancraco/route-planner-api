@@ -1,18 +1,27 @@
 package com.routeplanner.api.config
 
-import io.github.cdimascio.dotenv.dotenv
-import io.ktor.server.application.Application
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.JWTVerifier
-import com.routeplanner.api.domain.model.User
+import com.routeplanner.api.db.entities.UserEntity
+import com.routeplanner.api.domain.model.failure
 import com.routeplanner.api.domain.service.UserService
+import io.github.cdimascio.dotenv.dotenv
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.response.respond
+import java.security.SecureRandom
+import java.util.Base64
 import java.util.Date
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 
 object JwtConfig {
+    val ACCESS_TOKEN_EXPIRY_MS = 60.minutes
+    val REFRESH_TOKEN_EXPIRY_MS = 60.days
     private val dotenv = dotenv()
     val secret =
         System.getenv("JWT_SECRET")
@@ -56,7 +65,7 @@ fun Application.configureSecurity(userService: UserService) {
     val verifier = jwtVerifier()
 
     install(Authentication) {
-        jwt("jwt-auth") {
+        jwt("auth-jwt") {
             realm = JwtConfig.realm
             verifier(verifier)
             validate { cred ->
@@ -65,6 +74,15 @@ fun Application.configureSecurity(userService: UserService) {
                 ).asInt()?.let {
                     userService.getUserById(it)
                 }
+            }
+            challenge { _, _ ->
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    failure(
+                        HttpStatusCode.Unauthorized.value,
+                        "Token de acceso inválido o expirado."
+                    )
+                )
             }
         }
     }
@@ -107,18 +125,19 @@ fun jwtVerifier(): JWTVerifier {
  * @param user usuario para el cual se genera el token
  * @return token JWT en formato String, o null si ocurre un error durante la generación
  */
-fun generateToken(user: User): String? {
-    return try {
-        val expTime = 300000L
-        JWT.create()
-            .withAudience(JwtConfig.audience)
-            .withIssuer(JwtConfig.issuer)
-            .withClaim(JwtConfig.claimField, user.id)
-            .withExpiresAt(Date(System.currentTimeMillis() + expTime))
-            .sign(Algorithm.HMAC256(JwtConfig.secret))
+fun generateAccessToken(user: UserEntity): String {
+    val expTime = JwtConfig.ACCESS_TOKEN_EXPIRY_MS.inWholeMilliseconds
+    return JWT.create()
+        .withAudience(JwtConfig.audience)
+        .withIssuer(JwtConfig.issuer)
+        .withClaim(JwtConfig.claimField, user.id.value)
+        .withExpiresAt(Date(System.currentTimeMillis() + expTime))
+        .sign(Algorithm.HMAC256(JwtConfig.secret))
+}
 
-    } catch (e: Exception) {
-        //e.printStackTrace()
-        null
-    }
+// ── Refresh Token (string aleatorio, se guarda en BD) ────────────────────
+fun generateRefreshToken(): String {
+    val bytes = ByteArray(48)
+    SecureRandom().nextBytes(bytes)
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
 }
