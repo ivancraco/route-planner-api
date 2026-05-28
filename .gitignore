@@ -1,22 +1,51 @@
-# Environment
-.env
-
-# IntelliJ
-.idea/
-*.iml
-
 # Gradle
 .gradle/
 build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Kotlin
+*.class
+*.kotlin_module
 
 # Logs
 *.log
+*.stacktrace
+*.hprof
 
-# OS files
+# local DB
+*.mv.db
+*.db
+*.trace.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# SO
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Kotlin/Java
-out/
-*.hprof
-*.stacktrace
+# Local properties
+local.properties
+
+# Cache
+*.cache
+.cache/
+
+# Temp
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
