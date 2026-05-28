@@ -39,11 +39,11 @@ desktop.ini
 # Local properties
 local.properties
 
-# Cache
+# Cache files
 *.cache
 .cache/
 
-# Temp
+# Temp files
 tmp/
 temp/
 *.tmp
