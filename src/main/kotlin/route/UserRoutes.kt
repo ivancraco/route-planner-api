@@ -1,76 +1,54 @@
 package com.routeplanner.api.route
 
-import com.routeplanner.api.domain.model.LoginRequest
-import com.routeplanner.api.domain.model.RefreshRequest
+import com.routeplanner.api.domain.model.CreateRouteRequest
+import com.routeplanner.api.domain.model.UpdateRouteRequest
+import com.routeplanner.api.domain.model.User
 import com.routeplanner.api.domain.model.failure
 import com.routeplanner.api.domain.model.success
-import com.routeplanner.api.domain.service.UserService
+import com.routeplanner.api.domain.service.RouteService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.authentication
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 
-fun Application.userRoutes(userService: UserService) {
+fun Application.userRoutes(routeService: RouteService) {
     routing {
-        route("/api/users") {
-
-            post("/login") {
-                val request = call.receive<LoginRequest>()
-                val loginResponse = userService.login(request)
-                if (loginResponse == null) {
-                    call.respond(
-                        status = HttpStatusCode.NotFound,
-                        failure(
-                            code = HttpStatusCode.NotFound.value,
-                            "Los datos de usuario y/o contraseña son incorrectos."
-                        )
-                    )
-                    return@post
-                }
-                call.respond(
-                    status = HttpStatusCode.OK,
-                    success(loginResponse)
-                )
-            }
-
-            post("/refresh") {
-                val request = call.receive<RefreshRequest>()
-                val loginResponse = userService.updateTokens(request.refreshToken)
-                if (loginResponse == null) {
-                    call.respond(
-                        status = HttpStatusCode.Unauthorized,
-                        failure(
-                            code = HttpStatusCode.Unauthorized.value,
-                            "Token de actualización inválido o expirado."
-                        )
-                    )
-                    return@post
-                }
-                call.respond(
-                    status = HttpStatusCode.OK,
-                    success(loginResponse)
-                )
-            }
-
-            authenticate("auth-jwt") {
+        authenticate("auth-jwt") {
+            route("/routes") {
                 get {
-                    val users = userService.getAllUsers()
-                    if (users.isEmpty()) {
+                    val user = call.authentication.principal<User>()
+                    if (user == null) {
                         call.respond(
-                            status = HttpStatusCode.NotFound,
+                            status = HttpStatusCode.Unauthorized,
                             failure(
-                                code = HttpStatusCode.NotFound.value,
-                                "No se encontraron usuarios."
+                                HttpStatusCode.Unauthorized.value,
+                                "Usuario no autenticado."
                             )
                         )
                         return@get
                     }
-                    call.respond(success(users))
+                    val routes = routeService.getAllByUser(user.id)
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        success(routes)
+                    )
+                }
+
+                // retorna todas las rutas (supervisor)
+                get("/all") {
+                    val routes = routeService.getAll()
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        success(routes)
+                    )
                 }
 
                 get("/{id}") {
@@ -78,31 +56,128 @@ fun Application.userRoutes(userService: UserService) {
                     if (id == null) {
                         call.respond(
                             status = HttpStatusCode.BadRequest,
-                            failure(code = HttpStatusCode.BadRequest.value, "Id inválido.")
-                        )
-                        return@get
-                    }
-                    val user = userService.getUserById(id)
-                    if (user == null) {
-                        call.respond(
-                            status = HttpStatusCode.NotFound,
                             failure(
-                                code = HttpStatusCode.NotFound.value,
-                                "Usuario no encontrado."
+                                HttpStatusCode.BadRequest.value,
+                                "Id inválido."
                             )
                         )
                         return@get
                     }
-                    call.respond(success(user))
-                }
-
-                post("/logout") {
-                    val request = call.receive<RefreshRequest>()
-                    userService.logout(request.refreshToken)
-                    // Eliminar en cliente el access token.
+                    val route = routeService.getById(id)
+                    if (route == null) {
+                        call.respond(
+                            status = HttpStatusCode.NotFound,
+                            failure(
+                                HttpStatusCode.NotFound.value,
+                                "La ruta no existe."
+                            )
+                        )
+                        return@get
+                    }
                     call.respond(
                         status = HttpStatusCode.OK,
-                        success(mapOf("message" to "Sesión cerrada con éxito."))
+                        success(route)
+                    )
+                }
+
+                post {
+                    val user = call.authentication.principal<User>()
+                    if (user == null) {
+                        call.respond(
+                            status = HttpStatusCode.Unauthorized,
+                            failure(
+                                HttpStatusCode.Unauthorized.value,
+                                "Usuario no autenticado."
+                            )
+                        )
+                        return@post
+                    }
+                    val request = call.receive<CreateRouteRequest>()
+                    val route = routeService.create(user.id, request)
+                    call.respond(
+                        status = HttpStatusCode.Created,
+                        success(route)
+                    )
+                }
+
+                put("/{id}") {
+                    val id = call.parameters["id"]?.toIntOrNull()
+                    if (id == null) {
+                        call.respond(
+                            status = HttpStatusCode.BadRequest,
+                            failure(
+                                HttpStatusCode.BadRequest.value,
+                                "Id inválido."
+                            )
+                        )
+                        return@put
+                    }
+                    val user = call.authentication.principal<User>()
+                    if (user == null) {
+                        call.respond(
+                            status = HttpStatusCode.Unauthorized,
+                            failure(
+                                HttpStatusCode.Unauthorized.value,
+                                "Usuario no autenticado."
+                            )
+                        )
+                        return@put
+                    }
+                    val request = call.receive<UpdateRouteRequest>()
+                    val route = routeService.update(id, user.id, request)
+                    if (route == null) {
+                        call.respond(
+                            status = HttpStatusCode.NotFound,
+                            failure(
+                                HttpStatusCode.NotFound.value,
+                                "La ruta no existe o no pertenece al usuario."
+                            )
+                        )
+                        return@put
+                    }
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        success(route)
+                    )
+                }
+
+                delete("/{id}") {
+                    val id = call.parameters["id"]?.toIntOrNull()
+                    if (id == null) {
+                        call.respond(
+                            status = HttpStatusCode.BadRequest,
+                            failure(
+                                HttpStatusCode.BadRequest.value,
+                                "Id inválido."
+                            )
+                        )
+                        return@delete
+                    }
+                    val user = call.authentication.principal<User>()
+                    if (user == null) {
+                        call.respond(
+                            status = HttpStatusCode.Unauthorized,
+                            failure(
+                                HttpStatusCode.Unauthorized.value,
+                                "Usuario no autenticado."
+                            )
+                        )
+                        return@delete
+                    }
+                    val deleted = routeService.delete(id, user.id)
+                    if (!deleted) {
+                        call.respond(
+                            status = HttpStatusCode.NotFound,
+                            failure(
+                                HttpStatusCode.NotFound.value,
+                                "La ruta no existe o no pertenece al usuario."
+                            )
+                        )
+                        return@delete
+                    }
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        success(mapOf("message" to "Ruta eliminada con éxito."))
                     )
                 }
             }
