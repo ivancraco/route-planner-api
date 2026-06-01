@@ -4,8 +4,12 @@ import com.routeplanner.api.config.configureContentNegotiation
 import com.routeplanner.api.config.configureSecurity
 import com.routeplanner.api.db.initDB
 import com.routeplanner.api.di.configureKoin
+import com.routeplanner.api.domain.service.RouteService
+import com.routeplanner.api.domain.service.StopService
 import com.routeplanner.api.domain.service.UserService
 import com.routeplanner.api.route.userRoutes
+import com.routeplanner.api.route.userAuth
+import com.routeplanner.api.route.userStops
 import io.ktor.server.application.Application
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -23,7 +27,11 @@ fun Application.module() {
 
     val userService = get<UserService>()
     configureSecurity(userService)
-    userRoutes(userService)
+    userAuth(userService)
+    val routeService = get<RouteService>()
+    userRoutes(routeService)
+    val stopService = get<StopService>()
+    userStops(stopService)
 
     routing {
         get("/") {
