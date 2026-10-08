@@ -5,6 +5,8 @@ import kotlin.time.Instant
 
 @Serializable
 data class CreateRouteRequest(
+    val id: String,
+    val stateId: Int,
     val name: String,
     val createdAt: Instant,
     val originDir: String,
@@ -14,5 +16,6 @@ data class CreateRouteRequest(
     val destinationDir: String,
     val destinationPlaceId: String? = null,
     val destinationLatitude: Double,
-    val destinationLongitude: Double
+    val destinationLongitude: Double,
+    val stops: List<CreateStopRequest>? = null
 )

@@ -1,9 +1,10 @@
 package com.routeplanner.api.db.tables
 
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
+import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 import org.jetbrains.exposed.v1.datetime.timestamp
 
-object RouteTable: IntIdTable(name = "Route", columnName = "route_id") {
+object RouteTable: UUIDTable(name = "Route", columnName = "route_id") {
     val userId = reference("user_id", UserTable)
     val stateId = reference("route_state_id", RouteStateTable)
     val name = varchar("name", 50)

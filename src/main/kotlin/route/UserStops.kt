@@ -1,6 +1,7 @@
 package com.routeplanner.api.route
 
 import com.routeplanner.api.domain.model.CreateStopRequest
+import com.routeplanner.api.domain.model.ReorderStopRequest
 import com.routeplanner.api.domain.model.UpdateStopRequest
 import com.routeplanner.api.domain.model.User
 import com.routeplanner.api.domain.model.failure
@@ -21,6 +22,26 @@ import io.ktor.server.routing.routing
 
 fun Application.userStops(stopService: StopService) {
     routing {
+        route("/stop-states") {
+            get {
+                val user = call.principal<User>()
+                if (user == null) {
+                    call.respond(
+                        HttpStatusCode.Unauthorized,
+                        failure(
+                            HttpStatusCode.Unauthorized.value,
+                            "Usuario no autenticado."
+                        )
+                    )
+                    return@get
+                }
+                val states = stopService.getStates()
+                call.respond(
+                    HttpStatusCode.OK,
+                    states
+                )
+            }
+        }
         authenticate("auth-jwt") {
             route("/routes/{routeId}/stops") {
                 get {
@@ -35,7 +56,7 @@ fun Application.userStops(stopService: StopService) {
                         )
                         return@get
                     }
-                    val routeId = call.parameters["routeId"]?.toIntOrNull()
+                    val routeId = call.parameters["routeId"]
                     if (routeId == null) {
                         call.respond(
                             HttpStatusCode.BadRequest,
@@ -74,7 +95,7 @@ fun Application.userStops(stopService: StopService) {
                         )
                         return@post
                     }
-                    val routeId = call.parameters["routeId"]?.toIntOrNull()
+                    val routeId = call.parameters["routeId"]
                     if (routeId == null) {
                         call.respond(
                             HttpStatusCode.BadRequest,
@@ -99,11 +120,9 @@ fun Application.userStops(stopService: StopService) {
                     }
                     call.respond(
                         HttpStatusCode.Created,
-                        success(stop)
+                        true
                     )
                 }
-            }
-            route("/stops") {
                 get("/{id}") {
                     val user = call.principal<User>()
                     if (user == null) {
@@ -116,7 +135,7 @@ fun Application.userStops(stopService: StopService) {
                         )
                         return@get
                     }
-                    val stopId = call.parameters["id"]?.toIntOrNull()
+                    val stopId = call.parameters["id"]
                     if (stopId == null) {
                         call.respond(
                             HttpStatusCode.BadRequest,
@@ -155,7 +174,7 @@ fun Application.userStops(stopService: StopService) {
                         )
                         return@put
                     }
-                    val id = call.parameters["id"]?.toIntOrNull()
+                    val id = call.parameters["id"]
                     if (id == null) {
                         call.respond(
                             HttpStatusCode.BadRequest,
@@ -180,7 +199,48 @@ fun Application.userStops(stopService: StopService) {
                     }
                     call.respond(
                         HttpStatusCode.OK,
-                        success(stop)
+                        true
+                        //success(stop)
+                    )
+                }
+                put("/reorder") {
+                    val user = call.principal<User>()
+                    if (user == null) {
+                        call.respond(
+                            HttpStatusCode.Unauthorized,
+                            failure(
+                                HttpStatusCode.Unauthorized.value,
+                                "Usuario no autenticado."
+                            )
+                        )
+                        return@put
+                    }
+                    val routeId = call.parameters["routeId"]
+                    if (routeId == null) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            failure(
+                                HttpStatusCode.BadRequest.value,
+                                "Id de ruta inválido."
+                            )
+                        )
+                        return@put
+                    }
+                    val request = call.receive<List<ReorderStopRequest>>()
+                    val reordered = stopService.reorder(routeId, user.id, request)
+                    if (!reordered) {
+                        call.respond(
+                            HttpStatusCode.NotFound,
+                            failure(
+                                HttpStatusCode.NotFound.value,
+                                "La ruta asociada a este punto de entrega no pertenece al usuario."
+                            )
+                        )
+                        return@put
+                    }
+                    call.respond(
+                        HttpStatusCode.OK,
+                        true
                     )
                 }
                 delete("/{id}") {
@@ -195,7 +255,7 @@ fun Application.userStops(stopService: StopService) {
                         )
                         return@delete
                     }
-                    val id = call.parameters["id"]?.toIntOrNull()
+                    val id = call.parameters["id"]
                     if (id == null) {
                         call.respond(
                             HttpStatusCode.BadRequest,
@@ -219,9 +279,9 @@ fun Application.userStops(stopService: StopService) {
                     }
                     call.respond(
                         HttpStatusCode.OK,
-                        success(
-                            mapOf("message" to "Punto de entrega eliminado con éxito.")
-                        )
+                        true
+                        /*success(
+                            mapOf("message" to "Punto de entrega eliminado con éxito."))*/
                     )
                 }
             }

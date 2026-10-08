@@ -1,12 +1,16 @@
-package com.routeplanner.api.domain.model
+package com.routeplanner.api.data.model
 
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
+/**
+ * Clase para devolvérsela al usuario individual, no supervisor.
+ * Cuando hace login en otro dispositivo o logout -> login
+ * **/
 @Serializable
-data class Route(
+data class RouteEntityDto(
     val id: String,
-    val state: String,
+    val stateId: Int,
     val name: String,
     val createdAt: Instant,
     val originDir: String,
@@ -17,6 +21,5 @@ data class Route(
     val destinationPlaceId: String?,
     val destinationLatitude: Double,
     val destinationLongitude: Double,
-    val stops: List<Stop>
+    val stops: List<StopEntityDto>
 )
-

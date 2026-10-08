@@ -1,8 +1,8 @@
 package com.routeplanner.api.db.tables
 
-import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
+import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 
-object StopTable: IntIdTable(name = "Stop", columnName = "stop_id") {
+object StopTable: UUIDTable(name = "Stop", columnName = "stop_id") {
     val routeId = reference("route_id", RouteTable)
     val noticeId = reference("notice_id", NoticeTable)
     val stopStateId = reference("stop_state_id", StopStateTable)

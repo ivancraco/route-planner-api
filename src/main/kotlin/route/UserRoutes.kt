@@ -52,7 +52,7 @@ fun Application.userRoutes(routeService: RouteService) {
                 }
 
                 get("/{id}") {
-                    val id = call.parameters["id"]?.toIntOrNull()
+                    val id = call.parameters["id"]
                     if (id == null) {
                         call.respond(
                             status = HttpStatusCode.BadRequest,
@@ -80,6 +80,25 @@ fun Application.userRoutes(routeService: RouteService) {
                     )
                 }
 
+                get("/name/{name}") {
+                    val name = call.parameters["name"]
+                    if (name == null) {
+                        call.respond(
+                            status = HttpStatusCode.BadRequest,
+                            failure(
+                                HttpStatusCode.BadRequest.value,
+                                "Nombre inválido."
+                            )
+                        )
+                        return@get
+                    }
+                    val route = routeService.getByName(name)
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        success(route)
+                    )
+                }
+
                 post {
                     val user = call.authentication.principal<User>()
                     if (user == null) {
@@ -96,12 +115,12 @@ fun Application.userRoutes(routeService: RouteService) {
                     val route = routeService.create(user.id, request)
                     call.respond(
                         status = HttpStatusCode.Created,
-                        success(route)
+                        true
                     )
                 }
 
                 put("/{id}") {
-                    val id = call.parameters["id"]?.toIntOrNull()
+                    val id = call.parameters["id"]
                     if (id == null) {
                         call.respond(
                             status = HttpStatusCode.BadRequest,
@@ -137,12 +156,12 @@ fun Application.userRoutes(routeService: RouteService) {
                     }
                     call.respond(
                         status = HttpStatusCode.OK,
-                        success(route)
+                        true
                     )
                 }
 
                 delete("/{id}") {
-                    val id = call.parameters["id"]?.toIntOrNull()
+                    val id = call.parameters["id"]
                     if (id == null) {
                         call.respond(
                             status = HttpStatusCode.BadRequest,

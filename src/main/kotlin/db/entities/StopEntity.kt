@@ -1,14 +1,17 @@
 package com.routeplanner.api.db.entities
 
+import com.routeplanner.api.data.model.StopEntityDto
 import com.routeplanner.api.db.tables.StopTable
 import com.routeplanner.api.domain.model.Stop
+import com.routeplanner.api.domain.model.StopSummary
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
-import org.jetbrains.exposed.v1.dao.IntEntity
-import org.jetbrains.exposed.v1.dao.IntEntityClass
+import org.jetbrains.exposed.v1.dao.java.UUIDEntity
+import org.jetbrains.exposed.v1.dao.java.UUIDEntityClass
 import java.math.BigDecimal
+import java.util.UUID
 
-class StopEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<StopEntity>(StopTable)
+class StopEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<StopEntity>(StopTable)
     var routeId by StopTable.routeId
     var noticeId by StopTable.noticeId
     var stopStateId by StopTable.stopStateId
@@ -33,7 +36,7 @@ class StopEntity(id: EntityID<Int>) : IntEntity(id) {
     val stopState by StopStateEntity referencedOn StopTable.stopStateId
 
     fun toStop() = Stop(
-        id = id.value,
+        id = id.value.toString(),
         notice = notice.description,
         state = stopState.description,
         recipient = recipientName,
@@ -42,6 +45,25 @@ class StopEntity(id: EntityID<Int>) : IntEntity(id) {
         latitude = latitude,
         longitude = longitude,
         order = order,
+        note = note
+    )
+
+    fun toStopSummary() = StopSummary(
+        state = stopState.description,
+        direction = direction,
+        order = order
+    )
+
+    fun toStopDto() = StopEntityDto(
+        id = id.value.toString(),
+        noticeId = noticeId.value,
+        stateId = stopStateId.value,
+        recipient = recipientName,
+        direction = direction,
+        directionPlaceId = directionPlaceId,
+        latitude = latitude,
+        longitude = longitude,
+        order = order ?: 0,
         note = note
     )
 }
