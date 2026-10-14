@@ -22,24 +22,46 @@ import io.ktor.server.routing.routing
 
 fun Application.userStops(stopService: StopService) {
     routing {
-        route("/stop-states") {
-            get {
-                val user = call.principal<User>()
-                if (user == null) {
-                    call.respond(
-                        HttpStatusCode.Unauthorized,
-                        failure(
-                            HttpStatusCode.Unauthorized.value,
-                            "Usuario no autenticado."
+        authenticate("auth-jwt") {
+            route("/stop-states") {
+                get {
+                    val user = call.principal<User>()
+                    if (user == null) {
+                        call.respond(
+                            HttpStatusCode.Unauthorized,
+                            failure(
+                                HttpStatusCode.Unauthorized.value,
+                                "Usuario no autenticado."
+                            )
                         )
+                        return@get
+                    }
+                    val states = stopService.getStates()
+                    call.respond(
+                        HttpStatusCode.OK,
+                        states
                     )
-                    return@get
                 }
-                val states = stopService.getStates()
-                call.respond(
-                    HttpStatusCode.OK,
-                    states
-                )
+            }
+            route("/notices") {
+                get {
+                    val user = call.principal<User>()
+                    if (user == null) {
+                        call.respond(
+                            HttpStatusCode.Unauthorized,
+                            failure(
+                                HttpStatusCode.Unauthorized.value,
+                                "Usuario no autenticado."
+                            )
+                        )
+                        return@get
+                    }
+                    val notices = stopService.getNotices()
+                    call.respond(
+                        HttpStatusCode.OK,
+                        notices
+                    )
+                }
             }
         }
         authenticate("auth-jwt") {

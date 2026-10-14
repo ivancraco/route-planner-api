@@ -17,10 +17,11 @@ import java.security.SecureRandom
 import java.util.Base64
 import java.util.Date
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 object JwtConfig {
-    val ACCESS_TOKEN_EXPIRY_MS = 60.minutes
+    val ACCESS_TOKEN_EXPIRY_MS = 8.hours
     val REFRESH_TOKEN_EXPIRY_MS = 60.days
     private val dotenv = dotenv()
     val secret =

@@ -4,17 +4,17 @@ import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 import org.jetbrains.exposed.v1.datetime.timestamp
 
-object RouteTable: UUIDTable(name = "Route", columnName = "route_id") {
-    val userId = reference("user_id", UserTable)
-    val stateId = reference("route_state_id", RouteStateTable)
-    val name = varchar("name", 50)
-    val createdAt = timestamp("created_at")
-    val originDir = varchar("origin_dir", 200)
-    val originPlaceId = varchar("origin_place_id", 255).nullable()
-    val originLatitude = decimal("origin_latitude", 10, 8)
-    val originLongitude = decimal("origin_longitude", 11, 8)
-    val destinationDir = varchar("destination_dir", 200)
-    val destinationPlaceId = varchar("destination_place_id", 255).nullable()
-    val destinationLatitude = decimal("destination_latitude", 10, 8)
-    val destinationLongitude = decimal("destination_longitude", 11, 8)
+object RouteTable: UUIDTable(name = "Ruta", columnName = "id") {
+    val userId = reference("idUsuario", UserTable)
+    val stateId = reference("idEstado", RouteStateTable)
+    val name = varchar("nombre", 50)
+    val createdAt = timestamp("fecha")
+    val originDir = varchar("dirOrigen", 200)
+    val originPlaceId = varchar("dirOrigenPlaceId", 255).nullable()
+    val originLatitude = decimal("origenLatitud", 10, 8)
+    val originLongitude = decimal("origenLongitud", 11, 8)
+    val destinationDir = varchar("dirDestino", 200)
+    val destinationPlaceId = varchar("dirDestinoPlaceId", 255).nullable()
+    val destinationLatitude = decimal("destinoLatitud", 10, 8)
+    val destinationLongitude = decimal("destinoLongitud", 11, 8)
 }

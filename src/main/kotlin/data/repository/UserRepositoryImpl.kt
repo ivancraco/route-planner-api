@@ -11,6 +11,7 @@ import com.routeplanner.api.domain.model.LoginRequest
 import com.routeplanner.api.domain.model.LoginResponse
 import com.routeplanner.api.domain.model.User
 import com.routeplanner.api.domain.repository.UserRepository
+import com.routeplanner.api.utils.PasswordUtils
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.dao.with
@@ -40,13 +41,17 @@ class UserRepositoryImpl : UserRepository {
         return suspendTransaction {
             val user = UserEntity
                 .find {
-                    UserTable.username eq request.username and (UserTable.isActive eq true)
+                    UserTable.username eq request.username and (UserTable.isActive eq "AC")
                 }.with(UserEntity::supervisor).firstOrNull()
             user?.takeIf {
-                verifyPassword(
+                PasswordUtils.verifyMd5(
+                    password = request.password,
+                    hashStored = user.password
+                )
+                /*verifyPassword(
                     requestPass = request.password,
                     userPass = user.password
-                )
+                )*/
             }?.let {
                 val (accessToken, refreshToken) = buildTokensForUser(it)
                 LoginResponse(
@@ -110,12 +115,12 @@ class UserRepositoryImpl : UserRepository {
         val refreshToken = generateRefreshToken()
         val now = Clock.System.now()
 
-        UserSessionEntity.new {
+        /*UserSessionEntity.new {
             userId = user.id
             token = refreshToken
             createdAt = now
             expiresAt = now.plus(JwtConfig.REFRESH_TOKEN_EXPIRY_MS)
-        }
+        }*/
 
         return Pair(accessToken, refreshToken)
     }

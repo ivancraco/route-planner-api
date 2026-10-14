@@ -1,5 +1,6 @@
 package com.routeplanner.api.data.repository
 
+import com.routeplanner.api.db.entities.NoticeEntity
 import com.routeplanner.api.db.entities.RouteEntity
 import com.routeplanner.api.db.entities.StopEntity
 import com.routeplanner.api.db.entities.StopStateEntity
@@ -8,6 +9,7 @@ import com.routeplanner.api.db.tables.RouteTable
 import com.routeplanner.api.db.tables.StopStateTable
 import com.routeplanner.api.db.tables.StopTable
 import com.routeplanner.api.domain.model.CreateStopRequest
+import com.routeplanner.api.domain.model.Notice
 import com.routeplanner.api.domain.model.ReorderStopRequest
 import com.routeplanner.api.domain.model.Stop
 import com.routeplanner.api.domain.model.StopState
@@ -26,6 +28,17 @@ class StopRepositoryImpl : StopRepository {
         return suspendTransaction {
             StopStateEntity.all().map {
                 StopState(
+                    id = it.id.value,
+                    description = it.description
+                )
+            }
+        }
+    }
+
+    override suspend fun getNotices(): List<Notice> {
+        return suspendTransaction {
+            NoticeEntity.all().map {
+                Notice(
                     id = it.id.value,
                     description = it.description
                 )
@@ -67,7 +80,7 @@ class StopRepositoryImpl : StopRepository {
             StopEntity.new(UUID.fromString(request.id)) {
                 this.routeId = EntityID(UUID.fromString(routeId), RouteTable)
                 this.noticeId = EntityID(request.noticeId, NoticeTable)
-                this.stopStateId = EntityID(1, StopStateTable)
+                this.stopStateId = EntityID(10, StopStateTable)
                 this.recipientName = request.recipient
                 this.direction = request.direction
                 this.directionPlaceId = request.directionPlaceId

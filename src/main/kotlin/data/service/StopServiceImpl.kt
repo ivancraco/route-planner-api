@@ -1,6 +1,7 @@
 package com.routeplanner.api.data.service
 
 import com.routeplanner.api.domain.model.CreateStopRequest
+import com.routeplanner.api.domain.model.Notice
 import com.routeplanner.api.domain.model.ReorderStopRequest
 import com.routeplanner.api.domain.model.Stop
 import com.routeplanner.api.domain.model.StopState
@@ -11,6 +12,10 @@ import com.routeplanner.api.domain.service.StopService
 class StopServiceImpl(val stopRepository: StopRepository) : StopService {
     override suspend fun getStates(): List<StopState> {
         return stopRepository.getStates()
+    }
+
+    override suspend fun getNotices(): List<Notice> {
+        return stopRepository.getNotices()
     }
 
     override suspend fun getAllByRoute(

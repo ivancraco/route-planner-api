@@ -196,7 +196,7 @@ fun Application.userRoutes(routeService: RouteService) {
                     }
                     call.respond(
                         status = HttpStatusCode.OK,
-                        success(mapOf("message" to "Ruta eliminada con éxito."))
+                        true
                     )
                 }
             }

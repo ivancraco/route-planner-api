@@ -2,15 +2,15 @@ package com.routeplanner.api.db.tables
 
 import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
 
-object StopTable: UUIDTable(name = "Stop", columnName = "stop_id") {
-    val routeId = reference("route_id", RouteTable)
-    val noticeId = reference("notice_id", NoticeTable)
-    val stopStateId = reference("stop_state_id", StopStateTable)
-    val recipientName = varchar("recipient_name", 50)
-    val direction = varchar("direction", 200)
-    val directionPlaceId = varchar("direction_place_id", 255).nullable()
-    val latitude = decimal("latitude", 10, 8)
-    val longitude = decimal("longitude", 11, 8)
-    val order = integer("order").nullable()
-    val note = varchar("note", 255).nullable()
+object StopTable: UUIDTable(name = "Entrega", columnName = "id") {
+    val routeId = reference("idRuta", RouteTable)
+    val noticeId = reference("idIntimacionesCaracter", NoticeTable)
+    val stopStateId = reference("idIntimacionesResultados", StopStateTable)
+    val recipientName = varchar("destinatario", 50)
+    val direction = varchar("direcccion", 200)
+    val directionPlaceId = varchar("direccionPlaceId", 255).nullable()
+    val latitude = decimal("latitud", 10, 8)
+    val longitude = decimal("longitud", 11, 8)
+    val order = integer("orden").nullable()
+    val note = varchar("nota", 255).nullable()
 }
