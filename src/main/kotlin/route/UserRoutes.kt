@@ -44,10 +44,17 @@ fun Application.userRoutes(routeService: RouteService) {
 
                 // retorna todas las rutas (supervisor)
                 get("/all") {
-                    val routes = routeService.getAll()
+                    val username = call.request.queryParameters["username"]
+                    val page = call.request.queryParameters["page"]
+                        ?.toIntOrNull() ?: 1
+                    val pageSize = call.request.queryParameters["pageSize"]
+                        ?.toIntOrNull() ?: 10
+
+                    val result = routeService.getPage(username, page, pageSize)
+
                     call.respond(
                         status = HttpStatusCode.OK,
-                        success(routes)
+                        result
                     )
                 }
 
@@ -93,9 +100,10 @@ fun Application.userRoutes(routeService: RouteService) {
                         return@get
                     }
                     val route = routeService.getByName(name)
+                    val filtered = route.filter { it.stops.isNotEmpty() }
                     call.respond(
                         status = HttpStatusCode.OK,
-                        success(route)
+                        filtered
                     )
                 }
 

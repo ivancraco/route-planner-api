@@ -2,6 +2,7 @@ package com.routeplanner.api.data.service
 
 import com.routeplanner.api.data.model.RouteEntityDto
 import com.routeplanner.api.domain.model.CreateRouteRequest
+import com.routeplanner.api.domain.model.PageResult
 import com.routeplanner.api.domain.model.Route
 import com.routeplanner.api.domain.model.RouteSummary
 import com.routeplanner.api.domain.model.UpdateRouteRequest
@@ -17,6 +18,14 @@ class RouteServiceImpl(
 
     override suspend fun getAll(): List<RouteSummary> {
         return routeRepository.getAll()
+    }
+
+    override suspend fun getPage(
+        username: String?,
+        page: Int,
+        pageSize: Int
+    ): PageResult<RouteSummary> {
+        return routeRepository.getPage(username, page, pageSize)
     }
 
     override suspend fun getByName(name: String): List<RouteSummary> {

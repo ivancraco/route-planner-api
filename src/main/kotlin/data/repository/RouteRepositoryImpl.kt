@@ -2,15 +2,16 @@ package com.routeplanner.api.data.repository
 
 import com.routeplanner.api.data.model.RouteEntityDto
 import com.routeplanner.api.db.entities.RouteEntity
-import com.routeplanner.api.db.entities.UserEntity
 import com.routeplanner.api.db.tables.RouteStateTable
 import com.routeplanner.api.db.tables.RouteTable
 import com.routeplanner.api.db.tables.UserTable
 import com.routeplanner.api.domain.model.CreateRouteRequest
+import com.routeplanner.api.domain.model.PageResult
 import com.routeplanner.api.domain.model.Route
 import com.routeplanner.api.domain.model.RouteSummary
 import com.routeplanner.api.domain.model.UpdateRouteRequest
 import com.routeplanner.api.domain.repository.RouteRepository
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inSubQuery
@@ -67,6 +68,59 @@ class RouteRepositoryImpl : RouteRepository {
                 .map {
                     it.toRouteSummary()
                 }
+        }
+    }
+
+    override suspend fun getPage(
+        username: String?,
+        page: Int,
+        pageSize: Int
+    ): PageResult<RouteSummary> {
+
+        require(page >= 1) { "page debe ser mayor o igual a 1" }
+        require(pageSize in 1..100) {
+            "pageSize debe estar entre 1 y 100"
+        }
+
+        return suspendTransaction {
+            val userFilter = username?.trim()?.takeIf { it.isNotEmpty() }
+
+            val query = if (userFilter == null) {
+                RouteEntity.all()
+            } else {
+                RouteEntity.find {
+                    RouteTable.userId inSubQuery(
+                            UserTable
+                                .select(UserTable.id)
+                                .where(UserTable.username eq userFilter)
+                            )
+                }
+            }
+
+            val totalItems = query.count()
+            val offset = (page - 1L) * pageSize
+
+            val routes = query
+                .orderBy(RouteTable.createdAt to SortOrder.DESC)
+                .limit(pageSize)
+                .offset(offset)
+                .with(
+                    RouteEntity::user,
+                    RouteEntity::state,
+                    RouteEntity::stops
+                )
+                .map { it.toRouteSummary() }
+
+            val totalPages =
+                ((totalItems + pageSize - 1) / pageSize).toInt()
+
+            PageResult(
+                items = routes,
+                page = page,
+                pageSize = pageSize,
+                totalItems = totalItems,
+                totalPages = totalPages
+            )
         }
     }
 
