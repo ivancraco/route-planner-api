@@ -9,6 +9,7 @@ data class CreateStopRequest(
     val stateId: Int,
     val recipient: String,
     val direction: String,
+    val directionDetail: String? = null,
     val directionPlaceId: String? = null,
     val latitude: Double,
     val longitude: Double,

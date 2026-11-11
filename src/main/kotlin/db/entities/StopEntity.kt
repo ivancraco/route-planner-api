@@ -17,6 +17,7 @@ class StopEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var stopStateId by StopTable.stopStateId
     var recipientName by StopTable.recipientName
     var direction by StopTable.direction
+    var directionDetail by StopTable.directionDetail
     var directionPlaceId by StopTable.directionPlaceId
     private var _latitude by StopTable.latitude
     var latitude: Double
@@ -41,6 +42,7 @@ class StopEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         state = stopState.description,
         recipient = recipientName,
         direction = direction,
+        directionDetail = directionDetail,
         directionPlaceId = directionPlaceId,
         latitude = latitude,
         longitude = longitude,
@@ -60,6 +62,7 @@ class StopEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         stateId = stopStateId.value,
         recipient = recipientName,
         direction = direction,
+        directionDetail = directionDetail,
         directionPlaceId = directionPlaceId,
         latitude = latitude,
         longitude = longitude,

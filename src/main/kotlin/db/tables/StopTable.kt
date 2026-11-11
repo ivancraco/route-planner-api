@@ -8,6 +8,7 @@ object StopTable: UUIDTable(name = "Entrega", columnName = "id") {
     val stopStateId = reference("idIntimacionesResultados", StopStateTable)
     val recipientName = varchar("destinatario", 50)
     val direction = varchar("direcccion", 200)
+    val directionDetail = varchar("detalleDomicilio", 30).nullable()
     val directionPlaceId = varchar("direccionPlaceId", 255).nullable()
     val latitude = decimal("latitud", 10, 8)
     val longitude = decimal("longitud", 11, 8)

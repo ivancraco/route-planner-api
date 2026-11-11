@@ -9,6 +9,7 @@ data class Stop(
     val state: String,
     val recipient: String,
     val direction: String,
+    val directionDetail: String?,
     val directionPlaceId: String?,
     val latitude: Double,
     val longitude: Double,

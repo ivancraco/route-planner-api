@@ -9,6 +9,7 @@ data class StopEntityDto(
     val stateId: Int,
     val recipient: String,
     val direction: String,
+    val directionDetail: String?,
     val directionPlaceId: String?,
     val latitude: Double,
     val longitude: Double,

@@ -83,6 +83,7 @@ class StopRepositoryImpl : StopRepository {
                 this.stopStateId = EntityID(10, StopStateTable)
                 this.recipientName = request.recipient
                 this.direction = request.direction
+                this.directionDetail = request.directionDetail
                 this.directionPlaceId = request.directionPlaceId
                 this.latitude = request.latitude
                 this.longitude = request.longitude
@@ -116,6 +117,9 @@ class StopRepositoryImpl : StopRepository {
                 }
                 request.direction?.let { direction ->
                     it.direction = direction
+                }
+                request.directionDetail?.let { directionDetail ->
+                    it.directionDetail = directionDetail
                 }
                 request.directionPlaceId?.let { directionPlaceId ->
                     it.directionPlaceId = directionPlaceId
