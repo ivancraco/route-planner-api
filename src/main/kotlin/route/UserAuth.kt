@@ -22,19 +22,22 @@ fun Application.userAuth(userService: UserService) {
             post("/login") {
                 val request = call.receive<LoginRequest>()
                 val loginResponse = userService.login(request)
-                if (loginResponse == null) {
-                    call.respond(
-                        status = HttpStatusCode.NotFound,
-                        failure(
-                            code = HttpStatusCode.NotFound.value,
-                            "Los datos de usuario y/o contraseña son incorrectos."
+                if (loginResponse.error != null) {
+                    if (loginResponse.error.code == 404)
+                        call.respond(
+                            status = HttpStatusCode.NotFound,
+                            loginResponse
                         )
-                    )
+                    else
+                        call.respond(
+                            status = HttpStatusCode.Unauthorized,
+                            loginResponse
+                        )
                     return@post
                 }
                 call.respond(
                     status = HttpStatusCode.OK,
-                    success(loginResponse)
+                    loginResponse
                 )
             }
 

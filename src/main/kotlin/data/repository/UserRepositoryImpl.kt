@@ -1,12 +1,13 @@
 package com.routeplanner.api.data.repository
 
-import com.routeplanner.api.config.JwtConfig
 import com.routeplanner.api.config.generateAccessToken
 import com.routeplanner.api.config.generateRefreshToken
 import com.routeplanner.api.db.entities.UserEntity
 import com.routeplanner.api.db.entities.UserSessionEntity
 import com.routeplanner.api.db.tables.UserSessionTable
 import com.routeplanner.api.db.tables.UserTable
+import com.routeplanner.api.domain.model.ApiError
+import com.routeplanner.api.domain.model.ApiResponse
 import com.routeplanner.api.domain.model.LoginRequest
 import com.routeplanner.api.domain.model.LoginResponse
 import com.routeplanner.api.domain.model.User
@@ -37,31 +38,47 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-    override suspend fun login(request: LoginRequest): LoginResponse? {
+    override suspend fun login(request: LoginRequest): ApiResponse<LoginResponse> {
         return suspendTransaction {
             val user = UserEntity
                 .find {
                     UserTable.username eq request.username and (UserTable.isActive eq "AC")
                 }.with(UserEntity::supervisor).firstOrNull()
-            user?.takeIf {
+            if (user == null)
+                return@suspendTransaction ApiResponse(
+                    success = false,
+                    error = ApiError(
+                        404,
+                        "Usuario inexistente."
+                    )
+                )
+
+            val userExists = user.takeIf {
                 PasswordUtils.verifyMd5(
                     password = request.password,
                     hashStored = user.password
                 )
-                /*verifyPassword(
-                    requestPass = request.password,
-                    userPass = user.password
-                )*/
-            }?.let {
-                val (accessToken, refreshToken) = buildTokensForUser(it)
-                LoginResponse(
-                    id = it.id.value,
-                    username = it.username,
-                    isSupervisor = it.isSupervisor,
-                    accessToken = accessToken,
-                    refreshToken = refreshToken
-                )
             }
+
+            if (userExists != null) {
+                val (accessToken, refreshToken) = buildTokensForUser(userExists)
+                ApiResponse(
+                    success = true,
+                    data = LoginResponse(
+                        id = userExists.id.value,
+                        username = userExists.username,
+                        isSupervisor = userExists.isSupervisor,
+                        accessToken = accessToken,
+                        refreshToken = refreshToken
+                    )
+                )
+            } else ApiResponse(
+                success = false,
+                error = ApiError(
+                    401,
+                    "Usuario o contraseña inválidos."
+                )
+            )
         }
     }
 

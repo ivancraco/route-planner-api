@@ -1,5 +1,6 @@
 package com.routeplanner.api.data.service
 
+import com.routeplanner.api.domain.model.ApiResponse
 import com.routeplanner.api.domain.model.LoginRequest
 import com.routeplanner.api.domain.model.LoginResponse
 import com.routeplanner.api.domain.model.User
@@ -17,7 +18,7 @@ class UserServiceImpl(
         return userRepository.getUserById(id)
     }
 
-    override suspend fun login(request: LoginRequest): LoginResponse? {
+    override suspend fun login(request: LoginRequest): ApiResponse<LoginResponse> {
         return userRepository.login(request)
     }
 
