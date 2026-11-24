@@ -1,1 +1,1 @@
-Configurar las variables de entorno como se muestra en .env.example.
+Configurar las variables de entorno como se muestra en **.env.example**.
