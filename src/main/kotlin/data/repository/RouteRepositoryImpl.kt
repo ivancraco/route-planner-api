@@ -204,7 +204,11 @@ class RouteRepositoryImpl : RouteRepository {
     override suspend fun delete(routeId: String, userId: Int): Boolean {
         return suspendTransaction {
             val route = RouteEntity.findById(UUID.fromString(routeId))
-            if (route?.userId?.value != userId) return@suspendTransaction false
+                ?: return@suspendTransaction false
+            if (route.userId.value != userId) return@suspendTransaction false
+            // Entrega.idRuta references Ruta (FK_Entrega_Ruta): stops must be
+            // deleted before the route, otherwise the FK constraint fails.
+            route.stops.forEach { stop -> stop.delete() }
             route.delete()
             true
         }
